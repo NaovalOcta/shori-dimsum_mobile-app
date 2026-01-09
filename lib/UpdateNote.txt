@@ -1,0 +1,19 @@
+Update Note V1:
+- UI Selesai
+- Logic Navigation Selesai
+- Logic Pembelian Product Selesai
+- Logic Database Dummy Versi JSON Selesai
+
+Update Note V2;
+- Login System Selesai
+- Register System Selesai
+- Fix 'Beberapa' Bug
+
+Update Note V3
+- Logic Edit Profile Selesai
+- Logic Save Profile Selesai
+- Logic Search Product Selesai
+- Logic Filter Product Selesai
+- Penambahan Atribut ID
+- Fix Login Bug
+- Fix Filter Bug

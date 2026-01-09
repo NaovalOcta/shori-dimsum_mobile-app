@@ -1,0 +1,170 @@
+import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+import 'package:mobile_tugas_akhir/app/data/Product_DB.dart';
+import 'package:mobile_tugas_akhir/app/designs/colors/CustomColors.dart';
+import 'package:mobile_tugas_akhir/app/models/Product.dart'; 
+
+class FilterClass 
+{
+  final List<String> filterOptionsList = [
+    'Pilih Opsi', 
+    'A-Z', 
+    'Z-A', 
+    'Highest Price', 
+    'Lowest Price', 
+  ];
+  final RxString currentFilter = 'Pilih Opsi'.obs; 
+
+  void handleFilterSelection(String selection) {
+    if (selection != currentFilter.value) { currentFilter.value = selection; }
+  }
+
+  Color changeTextColor(String choosenFilter) {
+    return choosenFilter == currentFilter.value 
+        ? Colors.blue
+        : Colors.black; 
+  }
+
+  Color get changeIconColor {
+    return currentFilter.value != 'Pilih Opsi' 
+        ? Colors.white
+        : Colors.white;
+  }
+}
+
+class CategoryClass 
+{
+  final List<String> categoryNameList = [ 'All', 'Dimsum', 'Topping', 'Classic', 'Popular' ];
+  final RxList<bool> categorySelectionStateList = [ true, false, false, false, false ].obs;
+  final RxString selectedCategory = 'All'.obs;
+  
+  void toggleCategory(int newIndex) {
+    int currentIndex = categorySelectionStateList.indexOf(true);
+    if (newIndex == currentIndex) return;
+    if (currentIndex != -1) categorySelectionStateList[currentIndex] = false;
+
+    categorySelectionStateList[newIndex] = true;
+    selectedCategory.value = categoryNameList[newIndex];
+    // Get.log('Selected category: ${selectedCategory.value}');
+  }
+
+  Color changeTextColor(int index) {
+    return categorySelectionStateList.value[index] == true 
+        ? Colors.white 
+        : Colors.black54; 
+  }
+  
+  Color changeBgColor(int index) {
+    return categorySelectionStateList.value[index] == true 
+        ? CustomColors.primaryColor 
+        : Colors.white;
+  }
+
+  Color changeBorderColor(int index) {
+    return categorySelectionStateList.value[index] == true 
+        ? Colors.white 
+        : Colors.black54; 
+  }
+}
+
+class ResponsivityClass 
+{
+  RxInt gridCrossAxisCount = 2.obs;
+  RxDouble topMargin = 100.0.obs;
+
+  void updateWidgetOnRotation(Orientation orientation) {
+    if (isLandscape(orientation)) { 
+      gridCrossAxisCount.value = 4;
+      topMargin.value = 0.0;
+    } 
+    else {
+      gridCrossAxisCount.value = 2;
+      topMargin.value = 100.0;
+    }
+  }
+
+  bool isLandscape(Orientation orientation) { 
+    return orientation == Orientation.landscape; 
+  }
+}
+
+class ProductsCatalogClass {
+  RxList products = <Product>[].obs;
+  RxList favProductIds = <int>[].obs;
+  RxList cartProductsIds = <int>[].obs;
+  RxInt selectedProductId = 0.obs;
+
+  void toggleFavProduct(int productIndex) {
+    // product referensi ke fav product dan product biasa
+    Product product = products[productIndex];
+
+    if(product.isFavorite.value) {
+      favProductIds.remove(productIndex);
+      product.isFavorite.value = false;
+    } else {
+      favProductIds.add(productIndex);
+      product.isFavorite.value = true;
+    }
+  }
+  int getFavoriteProductLength() {
+    return favProductIds.value.length; 
+  }
+
+  void addCartProduct(int productIndex) {
+    if(!cartProductsIds.contains(productIndex)) {
+      cartProductsIds.add(productIndex);
+    }
+    else if(cartProductsIds.contains(productIndex)) {
+      Get.snackbar(
+        'Informasi', 
+        'Product sudah ada pada cart Anda !',
+        colorText: Colors.white,
+        backgroundColor: CustomColors.primaryColor
+      );
+    }
+  }
+  void deleteCartProduct(int productIndex) {
+    if(cartProductsIds.contains(productIndex)) {
+      Product selectedProduct = products.value[productIndex];
+      selectedProduct.orderQuantity.value = 1;
+      cartProductsIds.remove(productIndex);
+    }
+  }
+  bool isProductInCart(int productIndex) {
+    return cartProductsIds.contains(productIndex);
+  }
+
+  void increaseUnitQuantity(int productIndex) {
+    Product selectedProduct = products.value[productIndex];
+    selectedProduct.orderQuantity.value++;
+  }
+  void lowerUnitQuantity(int productIndex) {
+    Product selectedProduct = products[productIndex];
+    if(selectedProduct.orderQuantity > 1) selectedProduct.orderQuantity.value--;
+  }
+
+  void setSelectedProductId(int productId) {
+    selectedProductId.value = productId;
+  }
+  String getFormattedPrice(Product product) {
+    return "Rp. ${product.price.toString()}";
+  }
+}
+
+class FoodCatalogController extends GetxController {
+  final FilterClass filterClass = FilterClass();
+  final CategoryClass categoryClass = CategoryClass();
+  final ResponsivityClass responsiveClass = ResponsivityClass();
+  final ProductsCatalogClass productClass = ProductsCatalogClass();
+
+  @override
+  void onInit() {
+    super.onInit();
+    
+    productClass.products.addAll(ProductDb().productDataList);  
+  }
+
+  void resetAll() {
+    
+  }
+}
