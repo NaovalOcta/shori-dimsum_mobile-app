@@ -2,24 +2,54 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mobile_tugas_akhir/app/models/Product.dart';
 
 class ProductDb {
-  final _supabase = Supabase.instance.client;
+  final SupabaseClient client = Supabase.instance.client;
 
-  static final ProductDb _instance = ProductDb._internal();
-  factory ProductDb() {
-    return _instance;
-  }
-  ProductDb._internal();
-
+  // --- READ ---
   Future<List<Product>> fetchProducts() async {
-    try {
-      final response = await _supabase.from('products').select();
+    final response = await client.from('products').select();
+    final data = response as List<dynamic>;
+    return data.map((e) => Product.fromMap(e)).toList();
+  }
 
-      final data = response as List<dynamic>;
-      return data.map((item) => Product.fromMap(item)).toList();
-    } catch (e) {
-      print('Error fetching products: $e');
-      return [];
-    }
+  // --- CREATE ---
+  Future<void> addProduct(Product product) async {
+    // Convert Product object back to Map for DB
+    // Note: Pastikan field 'image_path' disimpan sebagai string path di DB
+    // Jika Anda punya fitur upload gambar, logic uploadnya terpisah di Controller
+    await client.from('products').insert({
+      'name': product.name,
+      'price': product.price,
+      'description': product.description,
+      'category': product.category,
+      'unitPieces': product.unitPieces.replaceAll(
+        ' pcs',
+        '',
+      ), // Simpan angka saja jika tipe DB smallint
+      'image_path': product.imagePath.isNotEmpty ? product.imagePath[0] : null,
+      'rating': '0.0', // Default rating
+    });
+  }
+
+  // --- UPDATE ---
+  Future<void> updateProduct(Product product) async {
+    await client
+        .from('products')
+        .update({
+          'name': product.name,
+          'price': product.price,
+          'description': product.description,
+          'category': product.category,
+          'unitPieces': product.unitPieces.replaceAll(' pcs', ''),
+          'image_path': product.imagePath.isNotEmpty
+              ? product.imagePath[0]
+              : null,
+        })
+        .eq('id', product.id); // Update berdasarkan ID
+  }
+
+  // --- DELETE ---
+  Future<void> deleteProduct(String id) async {
+    await client.from('products').delete().eq('id', id);
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_tugas_akhir/app/data/Product_DB.dart';
 import 'package:mobile_tugas_akhir/app/models/Product.dart';
+import 'package:mobile_tugas_akhir/app/routes/app_pages.dart';
 
 class AdminHomeController extends GetxController {
   // --- Reactive Variables ---
@@ -111,7 +112,15 @@ class AdminHomeController extends GetxController {
     applySort(currentSort.value);
   }
 
+  // Aksi Tombol Plus (+)
   void toAddMenu() {
-    Get.snackbar("Info", "Masuk ke halaman CRUD Menu");
+    // Ke halaman create (tanpa argumen)
+    Get.toNamed(Routes.ADMIN_MANAGE_MENU);
+  }
+
+  // Aksi Klik Produk (Edit/Read)
+  void toProductDetail(Product product) {
+    // Ke halaman edit (kirim objek product)
+    Get.toNamed(Routes.ADMIN_MANAGE_MENU, arguments: product);
   }
 }

@@ -331,97 +331,102 @@ class AdminHomeView extends GetView<AdminHomeController> {
 
   // --- Widget Card & Navbar (Tetap Sama) ---
   Widget _buildCard(Product product, bool isSoldOut) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      height: 110,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.brown.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                product.imagePath.isNotEmpty
-                    ? product.imagePath[0]
-                    : 'assets/products_placeholder.jpg',
-                width: 90,
-                height: 90,
-                fit: BoxFit.cover,
-                errorBuilder: (c, o, s) =>
-                    Container(width: 90, height: 90, color: Colors.grey[200]),
+    return GestureDetector(
+      onTap: () => controller.toProductDetail(product),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        height: 110,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.brown.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.asset(
+                  product.imagePath.isNotEmpty
+                      ? product.imagePath[0]
+                      : 'assets/products_placeholder.jpg',
+                  width: 90,
+                  height: 90,
+                  fit: BoxFit.cover,
+                  errorBuilder: (c, o, s) =>
+                      Container(width: 90, height: 90, color: Colors.grey[200]),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 15, 15, 15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          product.name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 17,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 15, 15, 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF3E2723),
+                              height: 1.1,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          isSoldOut ? "0 pcs" : product.unitPieces,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF3E2723),
-                            height: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSoldOut
+                              ? Colors.red
+                              : const Color(0xFF52D726),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          isSoldOut ? "SOLD OUT" : "ACTIVE",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
-                      Text(
-                        isSoldOut ? "0 pcs" : product.unitPieces,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSoldOut ? Colors.red : const Color(0xFF52D726),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        isSoldOut ? "SOLD OUT" : "ACTIVE",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
