@@ -499,7 +499,9 @@ class AdminHomeView extends GetView<AdminHomeController> {
                           color: Color(0xFFFFF8E1),
                           size: 28,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.toNamed(Routes.ADMIN_CHAT);
+                        },
                       ),
                       IconButton(
                         icon: const Icon(

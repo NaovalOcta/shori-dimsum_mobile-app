@@ -19,6 +19,7 @@ abstract class Routes {
   static const ADMIN_MANAGE_MENU = _Paths.ADMIN_MANAGE_MENU;
   static const ADMIN_ORDERS = _Paths.ADMIN_ORDERS;
   static const ADMIN_CHAT = _Paths.ADMIN_CHAT;
+  static const ADMIN_CHAT_DETAIL = _Paths.ADMIN_CHAT_DETAIL;
 }
 
 abstract class _Paths {
@@ -39,4 +40,5 @@ abstract class _Paths {
   static const ADMIN_MANAGE_MENU = '/admin-manage-menu';
   static const ADMIN_ORDERS = '/admin-orders';
   static const ADMIN_CHAT = '/admin-chat';
+  static const ADMIN_CHAT_DETAIL = '/admin-chat-detail';
 }
