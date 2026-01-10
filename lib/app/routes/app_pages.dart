@@ -24,10 +24,14 @@ import '../modules/5_payment/bindings/payment_binding.dart';
 import '../modules/5_payment/views/payment_view.dart';
 import '../modules/6_payment_complete/bindings/payment_complete_binding.dart';
 import '../modules/6_payment_complete/views/payment_complete_view.dart';
+import '../modules/admin_chat/bindings/admin_chat_binding.dart';
+import '../modules/admin_chat/views/admin_chat_view.dart';
 import '../modules/admin_home/bindings/admin_home_binding.dart';
 import '../modules/admin_home/views/admin_home_view.dart';
 import '../modules/admin_manage_menu/bindings/admin_manage_menu_binding.dart';
 import '../modules/admin_manage_menu/views/admin_manage_menu_view.dart';
+import '../modules/admin_orders/bindings/admin_orders_binding.dart';
+import '../modules/admin_orders/views/admin_orders_view.dart';
 
 part 'app_routes.dart';
 
@@ -106,6 +110,16 @@ class AppPages {
       name: _Paths.ADMIN_MANAGE_MENU,
       page: () => const AdminManageMenuView(),
       binding: AdminManageMenuBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_ORDERS,
+      page: () => const AdminOrdersView(),
+      binding: AdminOrdersBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_CHAT,
+      page: () => const AdminChatView(),
+      binding: AdminChatBinding(),
     ),
   ];
 }

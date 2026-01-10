@@ -11,10 +11,23 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: CustomColors.primaryColor,
-        automaticallyImplyLeading: false,
+        backgroundColor: CustomColors.backgroundColor_1,
+        elevation: 0,
         centerTitle: true,
-        title: const Text('Profile', style: TextStyle(color: Colors.white)),
+        // --- TAMBAHKAN BAGIAN LEADING INI ---
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF3E2723), // Dark Brown
+              size: 24,
+            ),
+            onPressed:
+                controller.backToDashboard, // Panggil fungsi di controller
+            tooltip: "Back to Home",
+          ),
+        ),
       ),
       body: Obx(() {
         // Menggunakan Obx agar UI update saat loading berubah

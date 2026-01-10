@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mobile_tugas_akhir/app/routes/app_pages.dart';
+import 'package:mobile_tugas_akhir/app/models/User.dart';
 
 class ProfileController extends GetxController {
   // Instance Supabase
@@ -98,6 +99,22 @@ class ProfileController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void backToDashboard() {
+    Get.back();
+    // // 1. Coba Back normal dulu (paling smooth)
+    // if (Get.previousRoute.isNotEmpty && !Get.previousRoute.contains('login')) {
+    //   Get.back();
+    // }
+    // // 2. Jika history kosong (misal refresh), paksa arahkan sesuai role
+    // else {
+    //   if (User.value.role == 'admin') {
+    //     Get.offAllNamed(Routes.ADMIN_HOME);
+    //   } else {
+    //     Get.offAllNamed(Routes.HOME);
+    //   }
+    // }
   }
 
   // Fungsi 4: Logout

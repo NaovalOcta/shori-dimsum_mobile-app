@@ -17,6 +17,8 @@ abstract class Routes {
   static const REGISTER = _Paths.REGISTER;
   static const ADMIN_HOME = _Paths.ADMIN_HOME;
   static const ADMIN_MANAGE_MENU = _Paths.ADMIN_MANAGE_MENU;
+  static const ADMIN_ORDERS = _Paths.ADMIN_ORDERS;
+  static const ADMIN_CHAT = _Paths.ADMIN_CHAT;
 }
 
 abstract class _Paths {
@@ -35,4 +37,6 @@ abstract class _Paths {
   static const REGISTER = '/register';
   static const ADMIN_HOME = '/admin-home';
   static const ADMIN_MANAGE_MENU = '/admin-manage-menu';
+  static const ADMIN_ORDERS = '/admin-orders';
+  static const ADMIN_CHAT = '/admin-chat';
 }

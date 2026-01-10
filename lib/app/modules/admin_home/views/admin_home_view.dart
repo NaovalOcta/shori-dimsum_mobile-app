@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:mobile_tugas_akhir/app/designs/colors/CustomColors.dart';
 import 'package:mobile_tugas_akhir/app/models/Product.dart';
 import 'package:mobile_tugas_akhir/app/modules/2_home/views/CustomBottomNavBar.dart';
+import 'package:mobile_tugas_akhir/app/routes/app_pages.dart';
 import '../controllers/admin_home_controller.dart';
 
 class AdminHomeView extends GetView<AdminHomeController> {
@@ -59,7 +60,7 @@ class AdminHomeView extends GetView<AdminHomeController> {
                     ),
                     const SizedBox(width: 15),
 
-                    // --- TOMBOL FILTER (Interaktif) ---
+                    // Filter Button (Interaktif)
                     Container(
                       width: 52,
                       height: 52,
@@ -79,9 +80,7 @@ class AdminHomeView extends GetView<AdminHomeController> {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => _showFilterBottomSheet(
-                              context,
-                            ), // Panggil BottomSheet
+                            onTap: () => _showFilterBottomSheet(context),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Image.asset(
@@ -181,158 +180,15 @@ class AdminHomeView extends GetView<AdminHomeController> {
     );
   }
 
-  // --- FILTER MODAL BOTTOM SHEET ---
-  void _showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor:
-          Colors.transparent, // Transparan agar bisa bikin rounded custom
-      builder: (context) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-          ),
-          padding: const EdgeInsets.all(25),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Ukuran menyesuaikan konten
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Judul & Indikator Geser
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Filter Menu",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Serif',
-                  color: Color(0xFF3E2723),
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // Opsi 1: Nama
-              const Text(
-                "Urutkan Nama",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildFilterChip("A - Z", "name_asc"),
-                  const SizedBox(width: 15),
-                  _buildFilterChip("Z - A", "name_desc"),
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
-              // Opsi 2: Porsi (Pcs)
-              const Text(
-                "Urutkan Porsi",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildFilterChip("Sedikit - Banyak", "pcs_asc"), // Ascending
-                  const SizedBox(width: 15),
-                  _buildFilterChip(
-                    "Banyak - Sedikit",
-                    "pcs_desc",
-                  ), // Descending
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              // Tombol Terapkan
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Get.back(); // Tutup modal
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CustomColors.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: const Text(
-                    "Terapkan Filter",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Widget Kecil untuk Pilihan Filter (Chip)
-  Widget _buildFilterChip(String label, String value) {
-    return Obx(() {
-      bool isSelected = controller.currentSort.value == value;
-      return GestureDetector(
-        onTap: () => controller.applySort(value),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? CustomColors.primaryColor : Colors.grey[100],
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: isSelected ? CustomColors.primaryColor : Colors.grey[300]!,
-              width: 1.5,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black87,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  // --- Widget Card & Navbar (Tetap Sama) ---
+  // --- WIDGET CARD (YANG DIPERBAIKI) ---
   Widget _buildCard(Product product, bool isSoldOut) {
+    // Ambil URL gambar pertama jika ada
+    String imgUrl = product.imagePath.isNotEmpty ? product.imagePath[0] : '';
+    // Cek apakah ini URL online (http/https)
+    bool isNetworkImage = imgUrl.startsWith('http');
+
     return GestureDetector(
-      onTap: () => controller.toProductDetail(product),
+      onTap: () => controller.toProductDetail(product), // Navigasi Edit
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         height: 110,
@@ -349,22 +205,51 @@ class AdminHomeView extends GetView<AdminHomeController> {
         ),
         child: Row(
           children: [
+            // Bagian Gambar
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: Image.asset(
-                  product.imagePath.isNotEmpty
-                      ? product.imagePath[0]
-                      : 'assets/products_placeholder.jpg',
+                child: SizedBox(
                   width: 90,
                   height: 90,
-                  fit: BoxFit.cover,
-                  errorBuilder: (c, o, s) =>
-                      Container(width: 90, height: 90, color: Colors.grey[200]),
+                  // LOGIKA BARU: Pilih Network atau Asset
+                  child: isNetworkImage
+                      ? Image.network(
+                          imgUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.grey[100],
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (c, o, s) => Image.asset(
+                            'assets/products_placeholder.jpg',
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          imgUrl.isNotEmpty
+                              ? imgUrl
+                              : 'assets/products_placeholder.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (c, o, s) => Image.asset(
+                            'assets/products_placeholder.jpg',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                 ),
               ),
             ),
+            // Bagian Info
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 15, 15, 15),
@@ -374,6 +259,7 @@ class AdminHomeView extends GetView<AdminHomeController> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Text(
@@ -388,12 +274,15 @@ class AdminHomeView extends GetView<AdminHomeController> {
                             ),
                           ),
                         ),
-                        Text(
-                          isSoldOut ? "0 pcs" : product.unitPieces,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            isSoldOut ? "0 pcs" : product.unitPieces,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -431,6 +320,137 @@ class AdminHomeView extends GetView<AdminHomeController> {
     );
   }
 
+  // --- FILTER MODAL ---
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Filter Menu",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Serif',
+                  color: Color(0xFF3E2723),
+                ),
+              ),
+              const SizedBox(height: 25),
+              const Text(
+                "Urutkan Nama",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _buildFilterChip("A - Z", "name_asc"),
+                  const SizedBox(width: 15),
+                  _buildFilterChip("Z - A", "name_desc"),
+                ],
+              ),
+              const SizedBox(height: 25),
+              const Text(
+                "Urutkan Porsi",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _buildFilterChip("Sedikit - Banyak", "pcs_asc"),
+                  const SizedBox(width: 15),
+                  _buildFilterChip("Banyak - Sedikit", "pcs_desc"),
+                ],
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CustomColors.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    "Terapkan Filter",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    return Obx(() {
+      bool isSelected = controller.currentSort.value == value;
+      return GestureDetector(
+        onTap: () => controller.applySort(value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? CustomColors.primaryColor : Colors.grey[100],
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(
+              color: isSelected ? CustomColors.primaryColor : Colors.grey[300]!,
+              width: 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black87,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
   Widget _buildNavBar(AdminHomeController controller) {
     return SizedBox(
       height: 110,
@@ -457,7 +477,9 @@ class AdminHomeView extends GetView<AdminHomeController> {
                           color: Color(0xFFFFF8E1),
                           size: 30,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.toNamed(Routes.ADMIN_HOME);
+                        },
                       ),
                       IconButton(
                         icon: const Icon(
@@ -465,7 +487,10 @@ class AdminHomeView extends GetView<AdminHomeController> {
                           color: Color(0xFFFFF8E1),
                           size: 30,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          // --- TAMBAHKAN NAVIGASI INI ---
+                          Get.toNamed(Routes.ADMIN_ORDERS);
+                        },
                       ),
                       const SizedBox(width: 80),
                       IconButton(
@@ -491,14 +516,13 @@ class AdminHomeView extends GetView<AdminHomeController> {
             ),
           ),
           Positioned(
-            bottom: 40,
+            bottom: 45,
             child: Container(
               width: 72,
               height: 72,
               decoration: BoxDecoration(
                 color: const Color(0xFF550B18),
                 shape: BoxShape.circle,
-                // Border dihapus agar tidak ada kuning/bg
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black26,
