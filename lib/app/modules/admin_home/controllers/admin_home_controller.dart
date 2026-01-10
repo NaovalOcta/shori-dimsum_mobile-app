@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_tugas_akhir/app/data/Product_DB.dart';
 import 'package:mobile_tugas_akhir/app/models/Product.dart';
-import 'package:mobile_tugas_akhir/app/routes/app_pages.dart';
 
 class AdminHomeController extends GetxController {
-  // List Produk
+  // --- Reactive Variables ---
   RxList<Product> allProducts = <Product>[].obs;
   RxList<Product> filteredProducts = <Product>[].obs;
-  
-  // Statistik
   RxInt totalMenu = 0.obs;
   RxInt menuHabis = 0.obs;
+  RxBool isLoading = true.obs;
 
-  // Search Controller
+  // Variabel untuk menyimpan filter yang aktif
+  // Value: 'name_asc', 'name_desc', 'pcs_asc', 'pcs_desc'
+  RxString currentSort = 'name_asc'.obs;
+
   TextEditingController searchC = TextEditingController();
 
   @override
@@ -22,50 +23,95 @@ class AdminHomeController extends GetxController {
     fetchProducts();
   }
 
-  // Ambil data produk (bisa dari Supabase via ProductDb)
-  void fetchProducts() async {
-    // Menggunakan ProductDb yang sudah ada
-    List<Product> products = await ProductDb().fetchProducts();
-    
-    // Jika database kosong/gagal, pakai dummy untuk visualisasi sesuai mockup (Opsional)
-    if (products.isEmpty) {
-       // Logic fallback jika kosong, tapi idealnya dari DB
-    }
+  Future<void> fetchProducts() async {
+    try {
+      isLoading.value = true;
+      List<Product> products = await ProductDb().fetchProducts();
 
-    allProducts.assignAll(products);
-    filteredProducts.assignAll(products);
-    calculateStats();
+      allProducts.assignAll(products);
+      filteredProducts.assignAll(products);
+
+      // Terapkan sort default setelah fetch
+      applySort(currentSort.value);
+      calculateStats();
+    } catch (e) {
+      print("Error fetching products: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // --- LOGIKA FILTER / SORTING ---
+  void applySort(String sortType) {
+    currentSort.value = sortType; // Simpan status sort
+
+    switch (sortType) {
+      case 'name_asc': // A - Z
+        filteredProducts.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
+        break;
+      case 'name_desc': // Z - A
+        filteredProducts.sort(
+          (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()),
+        );
+        break;
+      case 'pcs_asc': // Sedikit - Banyak
+        filteredProducts.sort(
+          (a, b) =>
+              _getPcsCount(a.unitPieces).compareTo(_getPcsCount(b.unitPieces)),
+        );
+        break;
+      case 'pcs_desc': // Banyak - Sedikit
+        filteredProducts.sort(
+          (a, b) =>
+              _getPcsCount(b.unitPieces).compareTo(_getPcsCount(a.unitPieces)),
+        );
+        break;
+    }
+  }
+
+  // Helper: Mengambil angka dari string "16 pcs" -> 16
+  int _getPcsCount(String pcsString) {
+    try {
+      // Hapus semua karakter non-digit, lalu parse ke int
+      String numbers = pcsString.replaceAll(RegExp(r'[^0-9]'), '');
+      return int.parse(numbers);
+    } catch (e) {
+      return 0; // Default jika gagal parse
+    }
   }
 
   void calculateStats() {
     totalMenu.value = allProducts.length;
-    // Logika Menu Habis: 
-    // Karena di model Product belum ada field 'stock', kita asumsikan 
-    // jika rating 0 atau logic lain sebagai 'Sold Out' untuk demo visual.
-    // Nanti Anda bisa tambahkan field 'stock' di database.
-    // Di sini saya hitung dummy dulu agar sesuai mockup visual.
-    menuHabis.value = allProducts.where((p) => p.name.contains("Habis") || p.rating == "0.0").length; 
+    menuHabis.value = allProducts.where((p) {
+      String stockStr = p.unitPieces.toLowerCase().replaceAll(
+        RegExp(r'[^0-9]'),
+        '',
+      );
+      int stock = int.tryParse(stockStr) ?? 1;
+      return stock == 0 || p.name.toLowerCase().contains('habis');
+    }).length;
   }
 
   void searchProduct(String query) {
     if (query.isEmpty) {
       filteredProducts.assignAll(allProducts);
     } else {
-      filteredProducts.assignAll(allProducts.where((product) => 
-        product.name.toLowerCase().contains(query.toLowerCase())
-      ).toList());
+      filteredProducts.assignAll(
+        allProducts
+            .where(
+              (product) =>
+                  product.name.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList(),
+      );
     }
+    // Tetap terapkan sort saat searching
+    applySort(currentSort.value);
   }
 
-  // Navigasi Tambah Menu (Tombol Plus)
   void toAddMenu() {
-    // Arahkan ke halaman tambah produk (buat route baru nanti)
-    Get.snackbar("Info", "Fitur Tambah Menu (Create) akan ada di sini");
-    // Get.toNamed(Routes.ADD_PRODUCT); 
-  }
-
-  void toProductDetail(Product product) {
-    // Admin mungkin ingin edit produk saat klik card
-    Get.snackbar("Info", "Edit produk: ${product.name}");
+    Get.snackbar("Info", "Masuk ke halaman CRUD Menu");
   }
 }

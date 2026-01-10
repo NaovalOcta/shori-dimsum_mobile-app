@@ -11,41 +11,36 @@ class AdminHomeView extends GetView<AdminHomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Menggunakan Background Image agar sama persis dengan User Home
+      resizeToAvoidBottomInset: false,
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          // 1. Background Image (Sesuai aset Home User)
+          // Background
           Positioned.fill(
-            child: Image.asset(
-              'assets/home_bg.jpg', // Menggunakan aset background dari folder assets
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/home_bg.jpg', fit: BoxFit.cover),
           ),
 
-          // 2. Main Content
+          // Main Content
           Column(
             children: [
               const SizedBox(height: 200),
 
-              // --- SEARCH BAR & FILTER ---
+              // Search Bar & Filter
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Row(
                   children: [
-                    // Search Bar
                     Expanded(
                       child: Container(
-                        height: 55,
+                        height: 52,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          // REVISI: Sudut sedikit melengkung (15) sesuai tombol filter
                           borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
+                              color: Colors.grey.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
@@ -55,44 +50,43 @@ class AdminHomeView extends GetView<AdminHomeController> {
                           style: const TextStyle(fontSize: 16),
                           decoration: const InputDecoration(
                             hintText: "Search",
-                            hintStyle: TextStyle(
-                              color: Colors.black45,
-                              fontSize: 16,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              size: 28,
-                              color: Colors.black87,
-                            ),
+                            prefixIcon: Icon(Icons.search, size: 28),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 15),
+                            contentPadding: EdgeInsets.symmetric(vertical: 14),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 15),
 
-                    // Filter Button (Menggunakan Image Asset filter_btn)
+                    // --- TOMBOL FILTER (Interaktif) ---
                     Container(
-                      width: 55,
-                      height: 55,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
                         color: CustomColors.primaryColor,
                         borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: CustomColors.primaryColor.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () {},
-                            // Menggunakan aset filter_btn.png/jpg yang ada di folder assets
+                            onTap: () => _showFilterBottomSheet(
+                              context,
+                            ), // Panggil BottomSheet
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Image.asset(
                                 '/assets/filter_btn.png',
-                                color: Colors
-                                    .white, // Tint putih agar kontras dengan background maroon
+                                color: Colors.white,
                                 errorBuilder: (c, o, s) =>
                                     const Icon(Icons.tune, color: Colors.white),
                               ),
@@ -107,7 +101,7 @@ class AdminHomeView extends GetView<AdminHomeController> {
 
               const SizedBox(height: 20),
 
-              // --- STATISTIK ---
+              // Statistik
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Row(
@@ -122,7 +116,7 @@ class AdminHomeView extends GetView<AdminHomeController> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 30),
+                    const SizedBox(width: 25),
                     Obx(
                       () => Text(
                         "Menu Habis: ${controller.menuHabis.value}",
@@ -139,51 +133,213 @@ class AdminHomeView extends GetView<AdminHomeController> {
 
               const SizedBox(height: 10),
 
-              // --- LIST MENU ---
+              // List Product
               Expanded(
                 child: Obx(() {
-                  if (controller.filteredProducts.isEmpty) {
-                    return const Center(child: Text("No products found"));
+                  if (controller.isLoading.value &&
+                      controller.allProducts.isEmpty) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: CustomColors.primaryColor,
+                      ),
+                    );
                   }
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      25,
-                      10,
-                      25,
-                      130,
-                    ), // Padding bawah ekstra untuk navbar
-                    itemCount: controller.filteredProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = controller.filteredProducts[index];
-                      // Simulasi status Sold Out (data asli nanti dari DB)
-                      bool isSoldOut = index > 0 && index % 2 != 0;
 
-                      return _buildAdminProductCard(product, isSoldOut);
-                    },
+                  return RefreshIndicator(
+                    onRefresh: controller.fetchProducts,
+                    color: CustomColors.primaryColor,
+                    child: controller.filteredProducts.isEmpty
+                        ? ListView(
+                            children: const [
+                              SizedBox(height: 100),
+                              Center(child: Text("No products found")),
+                            ],
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(25, 10, 25, 140),
+                            itemCount: controller.filteredProducts.length,
+                            itemBuilder: (context, index) {
+                              final product =
+                                  controller.filteredProducts[index];
+                              bool isSoldOut =
+                                  product.name.toLowerCase().contains(
+                                    'habis',
+                                  ) ||
+                                  product.unitPieces.startsWith('0');
+                              return _buildCard(product, isSoldOut);
+                            },
+                          ),
                   );
                 }),
               ),
             ],
           ),
 
-          // --- 3. CUSTOM BOTTOM NAVBAR ---
-          _buildAdminBottomBar(controller),
+          _buildNavBar(controller),
         ],
       ),
     );
   }
 
-  // Widget Kartu Produk
-  Widget _buildAdminProductCard(Product product, bool isSoldOut) {
+  // --- FILTER MODAL BOTTOM SHEET ---
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor:
+          Colors.transparent, // Transparan agar bisa bikin rounded custom
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Ukuran menyesuaikan konten
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Judul & Indikator Geser
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Filter Menu",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Serif',
+                  color: Color(0xFF3E2723),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              // Opsi 1: Nama
+              const Text(
+                "Urutkan Nama",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _buildFilterChip("A - Z", "name_asc"),
+                  const SizedBox(width: 15),
+                  _buildFilterChip("Z - A", "name_desc"),
+                ],
+              ),
+
+              const SizedBox(height: 25),
+
+              // Opsi 2: Porsi (Pcs)
+              const Text(
+                "Urutkan Porsi",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _buildFilterChip("Sedikit - Banyak", "pcs_asc"), // Ascending
+                  const SizedBox(width: 15),
+                  _buildFilterChip(
+                    "Banyak - Sedikit",
+                    "pcs_desc",
+                  ), // Descending
+                ],
+              ),
+
+              const SizedBox(height: 40),
+
+              // Tombol Terapkan
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.back(); // Tutup modal
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CustomColors.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    "Terapkan Filter",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Widget Kecil untuk Pilihan Filter (Chip)
+  Widget _buildFilterChip(String label, String value) {
+    return Obx(() {
+      bool isSelected = controller.currentSort.value == value;
+      return GestureDetector(
+        onTap: () => controller.applySort(value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? CustomColors.primaryColor : Colors.grey[100],
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(
+              color: isSelected ? CustomColors.primaryColor : Colors.grey[300]!,
+              width: 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black87,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  // --- Widget Card & Navbar (Tetap Sama) ---
+  Widget _buildCard(Product product, bool isSoldOut) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      height: 115,
+      height: 110,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.brown.withOpacity(0.05),
+            color: Colors.brown.withOpacity(0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -191,9 +347,8 @@ class AdminHomeView extends GetView<AdminHomeController> {
       ),
       child: Row(
         children: [
-          // Gambar Produk
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(10.0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: Image.asset(
@@ -203,11 +358,11 @@ class AdminHomeView extends GetView<AdminHomeController> {
                 width: 90,
                 height: 90,
                 fit: BoxFit.cover,
+                errorBuilder: (c, o, s) =>
+                    Container(width: 90, height: 90, color: Colors.grey[200]),
               ),
             ),
           ),
-
-          // Informasi Produk
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 15, 15, 15),
@@ -217,7 +372,6 @@ class AdminHomeView extends GetView<AdminHomeController> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
@@ -232,29 +386,25 @@ class AdminHomeView extends GetView<AdminHomeController> {
                           ),
                         ),
                       ),
-                      // Pcs Unit
                       Text(
                         isSoldOut ? "0 pcs" : product.unitPieces,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-
-                  // Badge Status (Pill Shape)
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 5,
+                        horizontal: 12,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isSoldOut
-                            ? Colors.red
-                            : const Color(0xFF52D726), // Hijau sesuai mockup
+                        color: isSoldOut ? Colors.red : const Color(0xFF52D726),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -263,7 +413,6 @@ class AdminHomeView extends GetView<AdminHomeController> {
                           color: Colors.white,
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
@@ -277,64 +426,58 @@ class AdminHomeView extends GetView<AdminHomeController> {
     );
   }
 
-  // Widget Bottom Navbar Admin
-  Widget _buildAdminBottomBar(AdminHomeController controller) {
-    const double barHeight = 80.0;
-    const Color navColor = Color(0xFF550B18); // Maroon Gelap
-    const Color iconColor = CustomColors.backgroundColor_1; // Cream
-
+  Widget _buildNavBar(AdminHomeController controller) {
     return SizedBox(
-      height: barHeight + 30, // Ruang untuk tombol plus menonjol
+      height: 110,
       child: Stack(
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
-          // Latar Belakang Lengkungan (CurvePainter)
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: SizedBox(
-              height: barHeight,
+              height: 65,
               child: CustomPaint(
-                painter: CurvePainter(backgroundColor: navColor),
+                painter: CurvePainter(backgroundColor: const Color(0xFF550B18)),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
                         icon: const Icon(
                           Icons.home_filled,
-                          color: iconColor,
+                          color: Color(0xFFFFF8E1),
                           size: 30,
+                        ),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.receipt_long_rounded,
+                          color: Color(0xFFFFF8E1),
+                          size: 30,
+                        ),
+                        onPressed: () {},
+                      ),
+                      const SizedBox(width: 80),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          color: Color(0xFFFFF8E1),
+                          size: 28,
                         ),
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(
                           Icons.person_outline_rounded,
-                          color: iconColor,
+                          color: Color(0xFFFFF8E1),
                           size: 30,
                         ),
                         onPressed: () => Get.toNamed('/profile'),
-                      ),
-                      const SizedBox(width: 60), // Spacer tengah
-                      IconButton(
-                        icon: const Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          color: iconColor,
-                          size: 28,
-                        ),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.favorite_border_rounded,
-                          color: iconColor,
-                          size: 28,
-                        ),
-                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -342,36 +485,31 @@ class AdminHomeView extends GetView<AdminHomeController> {
               ),
             ),
           ),
-
-          // Tombol Plus (+) Lingkaran Sempurna
           Positioned(
-            bottom: 45, // Naik ke atas
+            bottom: 40,
             child: Container(
-              width: 70,
-              height: 70,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: navColor,
-                shape: BoxShape.circle, // REVISI: LINGKARAN
-                border: Border.all(
-                  color: CustomColors.backgroundColor_1, // Border Cream Tebal
-                  width: 5,
-                ),
+                color: const Color(0xFF550B18),
+                shape: BoxShape.circle,
+                // Border dihapus agar tidak ada kuning/bg
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black26,
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Material(
-                color: Colors.transparent,
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: controller.toAddMenu,
-                  child: const Center(
-                    child: Icon(Icons.add, color: iconColor, size: 35),
+              child: InkWell(
+                onTap: controller.toAddMenu,
+                borderRadius: BorderRadius.circular(100),
+                child: const Center(
+                  child: Icon(
+                    Icons.restaurant_menu_rounded,
+                    color: Color(0xFFFFF8E1),
+                    size: 34,
                   ),
                 ),
               ),

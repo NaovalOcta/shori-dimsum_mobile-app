@@ -27,18 +27,44 @@ class Product extends HomeController {
   });
 
   factory Product.fromMap(Map<String, dynamic> map) {
+    // 1. Ambil data unitPieces (format angka di DB -> "16 pcs" di UI)
+    // Catatan: Postgres biasanya mengubah unitPieces menjadi 'unitpieces' (lowercase).
+    // Kita gunakan fallback agar aman.
+    var pcsData = map['unitPieces'] ?? map['unitpieces'] ?? map['unit_pieces']; 
+    String formattedPcs = '1 pcs'; // Default
+    
+    if (pcsData != null) {
+      formattedPcs = "$pcsData pcs"; // Mengubah angka 16 menjadi "16 pcs"
+    }
+
+    // 2. Ambil image_path (format text di DB -> List<String> di UI)
+    List<String> images = [];
+    if (map['image_path'] != null) {
+      images = [map['image_path'].toString()];
+    } else if (map['imagePath'] != null) {
+      images = [map['imagePath'].toString()];
+    }
+
     return Product(
-      id: map['id'],
-      name: map['name'],
-      description: map['description'],
-      category: map['category'],
-      unitPieces: map['unit_pieces'],
-      price: map['price'],
-      rating: map['rating'].toString(),
-      imagePath: List<String>.from(map['image_url']),
-      orderQuantity: map['order_quantity'] != null
-          ? (map['order_quantity'] as int).obs
-          : 1.obs,
+      id: map['id']?.toString() ?? '',
+      name: map['name'] ?? 'Tanpa Nama',
+      description: map['description'] ?? '',
+      category: map['category'] ?? 'General',
+      
+      // Hasil konversi angka ke string "XX pcs"
+      unitPieces: formattedPcs, 
+      
+      // Supabase mengembalikan BigInt untuk harga, kita ubah ke int
+      price: map['price'] is int 
+          ? map['price'] 
+          : int.tryParse(map['price']?.toString() ?? '0') ?? 0,
+      
+      rating: map['rating']?.toString() ?? '0.0',
+      
+      // Hasil konversi single path ke List
+      imagePath: images,
+          
+      orderQuantity: 1.obs,
     );
   }
 
