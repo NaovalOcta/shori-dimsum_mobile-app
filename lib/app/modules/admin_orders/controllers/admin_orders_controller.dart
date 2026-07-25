@@ -93,7 +93,7 @@ class AdminOrdersController extends GetxController {
           userId: old.userId,
           status: status,
           totalPrice: old.totalPrice,
-          itemsSummary: old.itemsSummary,
+          items: old.items,
           createdAt: old.createdAt,
         );
         orders.refresh(); // Refresh UI list

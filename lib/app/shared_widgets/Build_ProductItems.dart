@@ -67,7 +67,7 @@ Widget buildProductItems(int gridViewIndex, {bool isFavProduct = false, bool isP
                       size: 20
                     ),
                     Text(
-                      product.rating
+                      product.rating.toStringAsFixed(1)
                     )
                   ],
                 ),

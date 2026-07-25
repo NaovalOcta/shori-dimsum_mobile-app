@@ -9,7 +9,7 @@ class Product extends HomeController {
   String category;
   String unitPieces;
   int price;
-  String rating;
+  double rating;
 
   RxInt orderQuantity = 1.obs;
   RxBool isFavorite = false.obs;
@@ -59,7 +59,9 @@ class Product extends HomeController {
           ? map['price'] 
           : int.tryParse(map['price']?.toString() ?? '0') ?? 0,
       
-      rating: map['rating']?.toString() ?? '0.0',
+      rating: map['rating'] is String
+          ? double.tryParse(map['rating']) ?? 0.0
+          : (map['rating'] as num?)?.toDouble() ?? 0.0,
       
       // Hasil konversi single path ke List
       imagePath: images,

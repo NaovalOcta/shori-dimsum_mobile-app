@@ -285,8 +285,7 @@ class PaymentView extends GetView<PaymentController> {
                       )
                     ),
                     onPressed: () {
-                      controller.paymentClass.resetOrderCalculation();
-                      Get.toNamed(Routes.PAYMENT_COMPLETE);
+                      controller.paymentClass.submitOrder();
                     },
                   )
                 ]

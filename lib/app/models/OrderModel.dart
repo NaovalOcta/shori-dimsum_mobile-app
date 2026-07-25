@@ -1,9 +1,44 @@
+class OrderItemModel {
+  final String id;
+  final String productId;
+  final String productName;
+  final int unitPrice;
+  final int quantity;
+  final int subtotal;
+
+  OrderItemModel({
+    required this.id,
+    required this.productId,
+    required this.productName,
+    required this.unitPrice,
+    required this.quantity,
+    required this.subtotal,
+  });
+
+  factory OrderItemModel.fromMap(Map<String, dynamic> map) {
+    return OrderItemModel(
+      id: map['id']?.toString() ?? '',
+      productId: map['product_id']?.toString() ?? '',
+      productName: map['product_name'] ?? '',
+      unitPrice: map['unit_price'] is int
+          ? map['unit_price']
+          : int.tryParse(map['unit_price']?.toString() ?? '0') ?? 0,
+      quantity: map['quantity'] is int
+          ? map['quantity']
+          : int.tryParse(map['quantity']?.toString() ?? '1') ?? 1,
+      subtotal: map['subtotal'] is int
+          ? map['subtotal']
+          : int.tryParse(map['subtotal']?.toString() ?? '0') ?? 0,
+    );
+  }
+}
+
 class OrderModel {
   String id;
-  String userId; // Atau nama user jika di-join
-  String status; // pending, process, completed, cancelled
+  String userId;
+  String status;
   int totalPrice;
-  String itemsSummary; // Contoh: "Siomay (2), Hakau (1)"
+  List<OrderItemModel> items;
   String createdAt;
 
   OrderModel({
@@ -11,7 +46,7 @@ class OrderModel {
     required this.userId,
     required this.status,
     required this.totalPrice,
-    required this.itemsSummary,
+    required this.items,
     required this.createdAt,
   });
 
@@ -23,8 +58,10 @@ class OrderModel {
       totalPrice: map['total_price'] is int
           ? map['total_price']
           : int.tryParse(map['total_price']?.toString() ?? '0') ?? 0,
-      // Asumsi ada kolom items_summary atau kita mock dulu
-      itemsSummary: map['items_summary'] ?? 'Detail pesanan...',
+      items: (map['order_items'] as List<dynamic>?)
+              ?.map((e) => OrderItemModel.fromMap(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       createdAt: map['created_at'] ?? DateTime.now().toIso8601String(),
     );
   }

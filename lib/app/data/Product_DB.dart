@@ -26,7 +26,7 @@ class ProductDb {
         '',
       ), // Simpan angka saja jika tipe DB smallint
       'image_path': product.imagePath.isNotEmpty ? product.imagePath[0] : null,
-      'rating': '0.0', // Default rating
+      'rating': 0.0, // Default rating
     });
   }
 

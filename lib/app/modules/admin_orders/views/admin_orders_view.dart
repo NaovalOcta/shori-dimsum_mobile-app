@@ -136,7 +136,9 @@ class AdminOrdersView extends GetView<AdminOrdersController> {
 
           // 2. Items Summary
           Text(
-            order.itemsSummary,
+            order.items.isNotEmpty
+                ? order.items.map((item) => '${item.productName} (x${item.quantity})').join(', ')
+                : 'Detail pesanan...',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(

@@ -48,25 +48,14 @@ class RegisterInputClass {
       final User? user = res.user;
 
       if (user != null) {
-        // 3. Simpan data tambahan (Role, Phone, dll) ke tabel 'users'
-        // Tabel 'users' harus sudah dibuat di Supabase Dashboard
-        await supabase.from('users').insert({
-          'id': user.id, // PENTING: Link ID auth ke tabel public users
-          'email': emailInput,
-          'name': 'New User', // Default name, atau tambah controller input name
-          'phone_number': phoneNumInput,
-          'role': 'user', // Default role user biasa
-          'created_at': DateTime.now().toIso8601String(),
-        });
+        // Profil user dibuat otomatis oleh trigger handle_new_user di database.
+        // Tidak perlu insert manual ke tabel users.
 
         Get.snackbar(
           'Register Successful',
           "Account created! Please Login.",
           backgroundColor: Colors.white,
         );
-
-        // Opsional: Langsung arahkan ke login
-        // Get.offNamed(Routes.LOGIN);
       }
     } on AuthException catch (e) {
       Get.snackbar('Register Failed', e.message, backgroundColor: Colors.white);

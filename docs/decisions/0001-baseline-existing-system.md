@@ -1,4 +1,4 @@
-# ADR 0001: Baseline — Dokumentasi Retroaktif Sistem yang Sudah Ada
+    # ADR 0001: Baseline — Dokumentasi Retroaktif Sistem yang Sudah Ada
 
 **Status:** Diterima  
 **Tanggal:** 2026-07-23  

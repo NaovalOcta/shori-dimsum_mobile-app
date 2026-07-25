@@ -9,7 +9,7 @@ class OrderDb {
     // Mengambil data dari tabel 'orders' dan mengurutkan dari yang terbaru
     final response = await client
         .from('orders')
-        .select()
+        .select('*, order_items(*)')
         .order('created_at', ascending: false);
 
     final data = response as List<dynamic>;

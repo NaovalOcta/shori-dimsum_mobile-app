@@ -138,7 +138,7 @@ class AdminManageMenuController extends GetxController {
         imagePath: finalImageUrl.isNotEmpty
             ? [finalImageUrl]
             : [], // Simpan URL
-        rating: '0.0',
+        rating: 0.0,
         orderQuantity: 1.obs,
       );
 
