@@ -9,7 +9,7 @@
 .buildlog/
 .history
 .svn/
-.swiftpm/
+.swiftpm/agent
 migrate_working_dir/
 node_modules/
 package-lock.json
